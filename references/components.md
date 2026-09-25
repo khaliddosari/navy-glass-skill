@@ -1,10 +1,11 @@
 # Components
 
-Read this when setting up the component layer in a new project or adding a
-component that has to match the rest.
+Read this when writing a component of your own that has to match the rest, or
+checking that a project's component layer is set up the house way. For the
+components the registry ships, `references/catalog.md` has an entry each.
 
 - [The stack](#the-stack)
-- [Setting it up](#setting-it-up)
+- [components.json](#componentsjson)
 - [How a component is written](#how-a-component-is-written)
 - [The panel](#the-panel)
 - [The status pill](#the-status-pill)
@@ -16,34 +17,45 @@ component that has to match the rest.
 
 ## The stack
 
-React 19 + TypeScript + Vite, Tailwind v4, shadcn (`base-nova` style, which is
-built on Base UI rather than Radix), `lucide-react` for icons, `sonner` for
-toasts, `class-variance-authority` for variants, `cn` for class merging.
+React 19 + TypeScript, Vite or Next.js, Tailwind v4, shadcn in the `base-nova`
+style (built on Base UI rather than Radix), `lucide-react` for icons, the Base UI
+`toast` for notifications, `class-variance-authority` for variants, `cn` for class
+merging. Older projects on a Radix style (`new-york`, `radix-nova`) or on
+`sonner` stay on them; everything here still applies.
 
-`src/lib/utils.ts` is one line: `export { cn } from "cn"`. Components import from
-`@/lib/utils` so the merge implementation can change in one place.
+Current registry files import `cn` straight from the `cn` package and
+`src/lib/utils.ts` re-exports it; files added by an older CLI import it from
+`@/lib/utils`. It is the same function either way. `cn` resolves conflicting
+utilities, so a `className` passed in wins over the component's own classes.
 
-Path alias `@` → `./src`, set in both `vite.config.ts` (`resolve.alias`) and
-`tsconfig.app.json` (`paths`). shadcn's CLI expects it.
+Path alias `@` → `./src`, set in both the bundler config and `tsconfig`
+(`paths`). `shadcn init` writes both; an older project may need them added by
+hand before the CLI will run.
 
-## Setting it up
+## components.json
 
-```bash
-npm create vite@latest <name> -- --template react-ts
-cd <name>
-npm i tailwindcss @tailwindcss/vite tw-animate-css class-variance-authority cn lucide-react
-npx shadcn@latest init          # style: base-nova, base colour: neutral, CSS variables: yes
-npx shadcn@latest add button card input label badge tabs separator
+The setup commands are in `SKILL.md`. Whatever the project's age, the file should
+end up with:
+
+```json
+{
+  "style": "base-nova",
+  "iconLibrary": "lucide",
+  "rtl": true,
+  "menuColor": "default",
+  "tailwind": { "cssVariables": true }
+}
 ```
 
-Then paste `assets/theme.css` at the end of `src/index.css`. The navy tokens
-override the neutral ones the CLI just wrote; see `references/theme.md` for why
-the order matters.
-
-`components.json` should end up with `"style": "base-nova"`, `"iconLibrary":
-"lucide"`, `"cssVariables": true`. Leave `"rtl": false` even for Arabic projects:
-direction is handled by `dir` on `<html>` plus logical properties, not by asking
-the CLI to generate a second set of components.
+- `"rtl": true`, even for a project that is English only today. The CLI then
+  writes every component with logical properties and `rtl:` flips. It does not
+  generate a second set of components; the same files work in both directions.
+  In an existing project, `npx shadcn@latest migrate rtl -y` sets it and converts
+  the existing files.
+- `"menuColor": "default"`. The translucent setting forces destructive menu items
+  to navy with `!important`; `theme.css` already gives menus the glass.
+- `"style"` is whatever the project already uses. A Radix style is fine; do not
+  switch styles as part of a restyle.
 
 ## How a component is written
 
@@ -103,11 +115,41 @@ const toneClass = {
 const dotClass = {
   idle: "bg-slate-400", running: "bg-blue-600", done: "bg-green-600", malfunction: "bg-red-600",
 }
+
+function StatusPill({ label, tone, className }: { label: string; tone: Tone; className?: string }) {
+  return (
+    <Badge
+      variant="outline"
+      className={cn("shrink-0 gap-1.5 font-mono text-xs uppercase rtl:font-sans", toneClass[tone], className)}
+    >
+      <span aria-hidden="true" className="relative flex size-1.5">
+        {tone === "running" && (
+          <span className={cn("absolute inline-flex size-full rounded-full opacity-60 motion-safe:animate-ping", dotClass[tone])} />
+        )}
+        <span className={cn("relative inline-flex size-1.5 rounded-full", dotClass[tone])} />
+      </span>
+      {label}
+    </Badge>
+  )
+}
 ```
 
-The pill is `font-mono text-xs uppercase` in Latin and `rtl:font-sans` in Arabic,
-since uppercase and mono mean nothing to Arabic letterforms. The running dot gets
-a `motion-safe:animate-ping` halo.
+The pill is a `Badge`, so it carries `data-slot="badge"`, and that is how the
+theme gives it the ornate letterforms in Arabic. A pill built from a plain `span`
+needs `data-slot="badge"` added by hand, or it loses them. The `outline` variant
+is only the frame; the colour comes from the tone classes, which is why the other
+badge variants are not used for status.
+
+It is `font-mono text-xs uppercase` in Latin and `rtl:font-sans` in Arabic, since
+uppercase and mono mean nothing to Arabic letterforms. In English the uppercase
+mono makes it wide ("BEING HANDLED" is about 9rem), so size grid columns with the
+longest English label, not the Arabic one. The running dot gets a
+`motion-safe:animate-ping` halo.
+
+**`font-ornate` and `cn`.** `cn` merges conflicting utilities, and it reads
+`font-ornate` as a font-family class. In one `cn()` call, `font-ornate` and
+`font-sans` (or `font-mono`) cancel each other and only the last survives. Put
+`font-ornate` on an inner span, or on an element with no other font class.
 
 These four are the only saturated colours in the design. Everything else is navy,
 which is what makes a red pill land.
@@ -139,10 +181,14 @@ own colour.
 
 ## Switches
 
-A settings page is mostly switches, and the mirroring trap here is real: the
-obvious `translate-x` thumb animation moves the thumb the wrong way in RTL, since
-the transform is physical. Drive the thumb from `inset-inline-start` instead, so
-it follows the document direction for free:
+A settings page is mostly switches. In a project, use the shadcn `Switch`: its
+thumb moves with `translate-x`, which is physical, but with `"rtl": true` the CLI
+adds the `rtl:` counterpart, so it slides the right way in Arabic. A project that
+cannot run the RTL migration yet has thumbs that slide backwards; migrate rather
+than patch.
+
+In a standalone page with no component library, build it by driving the thumb
+from `inset-inline-start`, which follows the document direction for free:
 
 ```jsx
 <button
@@ -151,13 +197,16 @@ it follows the document direction for free:
   aria-checked={on}
   onClick={() => setOn(!on)}
   className="relative h-6 w-11 shrink-0 rounded-full ring-1 ring-(--glass-edge)
-             transition-colors aria-checked:bg-primary bg-muted"
+             transition-colors aria-checked:bg-primary bg-input"
 >
   <span className="absolute top-0.5 size-5 rounded-full bg-background shadow-sm
                    transition-[inset-inline-start] start-0.5
                    in-aria-checked:start-[1.375rem]" />
 </button>
 ```
+
+The off track is `bg-input`, the same as the stock switch. `bg-muted` looks
+right in isolation and disappears on a card: a pale track under a pale thumb.
 
 The row around it is the clickable target, with the label and its one-line
 explanation on the reading-start side and the switch at `ms-auto`. A switch that
@@ -168,15 +217,22 @@ cannot be turned off (a security alert, a required notice) stays on and gets
 
 A dialog is a popover surface, not a panel: `bg-popover` at its higher opacity,
 because text over a scrim needs more backing than text over the wash. The scrim
-is navy at low alpha with a light blur, never black:
+is navy at low alpha with a light blur, never black.
+
+In a project, that is the shadcn `Dialog` or `AlertDialog` with nothing added:
+`theme.css` turns its overlay navy (`--scrim`) and gives the content the blur and
+`--popup-shadow`. Base UI supplies the focus trap, Escape, scroll lock and the
+portal. Older Radix styles (`new-york`) make the content opaque `bg-background`;
+that reads fine, so leave it rather than editing the file.
+
+In a standalone page, a native `<dialog>` with `showModal()` gets the focus trap,
+Escape and the backdrop for free, and takes the same tokens, blur included:
 
 ```
-backdrop:bg-slate-950/40 backdrop:backdrop-blur-sm
-m-auto w-[min(26rem,calc(100vw-2rem))] rounded-2xl bg-popover p-0 shadow-2xl
+backdrop:bg-(--scrim) backdrop:backdrop-blur-sm
+m-auto w-[min(26rem,calc(100vw-2rem))] rounded-2xl bg-popover p-0 shadow-(--popup-shadow)
+backdrop-blur-xl backdrop-saturate-150
 ```
-
-A native `<dialog>` with `showModal()` gets focus trapping, Escape and the
-backdrop for free, which is worth more than a custom implementation.
 
 Destructive confirmations ask the person to type the word rather than just
 clicking again, and the confirm button stays disabled until they do.
@@ -189,9 +245,10 @@ clicking again, and the confirm button stays disabled until they do.
 - A placeholder shows a realistic example, not a description of the format.
 - Labels are real `<Label htmlFor>`, never placeholder-as-label: the placeholder
   disappears exactly when someone needs it.
-- Destructive actions use `variant="destructive"`. Stock shadcn ships that as a
-  solid red slab, so the house version overrides it in `button.tsx`. Without this
-  override the convention and the code disagree:
+- Destructive actions use `variant="destructive"`, which is a tint, not a solid
+  red slab. `base-nova` already ships it that way. Older styles (`new-york` and
+  its generation) ship the slab, so in those projects replace the variant in
+  `button.tsx` with the tinted one:
 
   ```ts
   destructive:

@@ -22,7 +22,7 @@ the same glass panels:
 <main className="mx-auto w-full max-w-5xl px-4 py-8 sm:px-6 lg:py-12">
   <header className="mb-6">
     <p className="text-xs text-muted-foreground">{breadcrumb}</p>
-    <h1 className="font-brand text-3xl font-black">{title}</h1>
+    <h1 className="text-3xl font-bold">{title}</h1>
     <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>
   </header>
   <div className="flex flex-col gap-5">{panels}</div>
@@ -38,13 +38,20 @@ the same glass panels:
 - A side rail (`lg:grid-cols-[15rem_minmax(0,1fr)]`, rail `lg:sticky lg:top-24`)
   is worth it past three or four panels. Below `lg` it becomes a horizontally
   scrolling row of chips rather than stacking, which would push the content down
-  a whole screen.
+  a whole screen. Give each panel `scroll-mt-6 lg:scroll-mt-24` so a rail link
+  does not park its heading under the sticky header, and mark the last item
+  current once the page reaches its bottom, since the last panels can never
+  scroll up to the top.
 - Panel footers hold the actions for that panel (Cancel, Save) rather than one
   page-wide save bar, so it is obvious what a button applies to.
 
 The page still scrolls normally: no `h-dvh`, no `overflow-hidden`, no `desk:`
 grid. Use those only when someone is watching the screen rather than working
 down it.
+
+Beside a shadcn sidebar, the page sits inside `SidebarInset`, which already
+renders a `<main>`; there, the outer element above is a `div`, so the page does
+not end up with two `<main>` landmarks.
 
 ## The shape of the layouts
 
@@ -128,6 +135,27 @@ The order is the point: artwork, then description, then everything. The heading
 survives longest because a labelled empty box is informative and an unlabelled one
 is a bug report.
 
+`placeholder` is a container name, not a keyword: use your own (`card`, `feed`),
+the same in the variant and in `container-name`. These three variants are not in
+`theme.css`; add them to the project's stylesheet when a screen needs them.
+
+**A grid of cards that fills a locked panel** is the commonest console case: N
+cards should fill the panel, and past that the panel scrolls inside. Make the
+panel body a size container and size the rows from its height:
+
+```jsx
+<div className="min-h-0 flex-1 overflow-y-auto desk:@container-size">
+  <div className="grid gap-3 sm:grid-cols-2 desk:grid-cols-4
+                  desk:auto-rows-[calc((100cqh-1.5rem)/3)]">   {/* 3 rows; 1.5rem = two gap-3 gaps */}
+    {cards}
+  </div>
+</div>
+```
+
+Three rows fill the panel exactly, a fourth scrolls inside it, and a filtered
+view with two cards keeps normal-sized cards and empty space rather than two
+giant ones. Each card can be its own container for the shedding above.
+
 ## Phone first, and what that costs
 
 The phone is not a shrunken desktop; it is the layout that has to give things up.
@@ -140,11 +168,15 @@ Decisions that repeat across projects:
   becomes one letter. Render both spans and switch with `sm:hidden` /
   `hidden sm:inline`, so the desktop text is untouched.
 - Controls stay at least 40px tall on a phone (`h-10 lg:h-8`): 32px is comfortable
-  with a mouse and too small with a thumb.
+  with a mouse and too small with a thumb. That means inputs and selects as well
+  as buttons, at the same heights, so a form footer lines up.
 - Check 360px, not just 390px. The difference is one wrapped row often enough to
   matter.
 - Prefer reordering the DOM over `order-*` utilities when the order should hold at
-  every width, so the tab order keeps matching what people see.
+  every width, so the tab order keeps matching what people see. The one accepted
+  exception is the header nav: between brand and actions on desktop, on its own
+  row on a phone. No single DOM order does both, so it is `order-last` on the
+  phone (`order-last lg:order-0`) and the desktop order in the DOM.
 
 ## Density patterns
 
