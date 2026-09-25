@@ -149,6 +149,96 @@
           "text": "Both the updated StatusBoard.tsx and a working standalone HTML preview were delivered"
         }
       ]
+    },
+    {
+      "id": 3,
+      "name": "restyle-old-radix-project",
+      "prompt": "I have an older Next.js app (App Router, Tailwind v4) set up with shadcn in the new-york style, so it's on Radix. components.json has \"rtl\": false. components/ui has button, card, dialog, dropdown-menu, select, sidebar and sonner, and I've made a few edits to button.tsx that I want to keep. There's a dark mode toggle using next-themes. I want it in my usual look and ready for Arabic. Don't rewrite the app; give me the exact steps and file changes, in order.",
+      "expected_output": "An ordered migration plan that keeps Radix, turns on RTL through the CLI migration rather than overwriting components, pastes the theme last, pins the theme to light, fixes the new-york destructive variant, and wires direction for Next.js.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "rtl-migration",
+          "text": "Turns RTL on with `shadcn migrate rtl` (which sets \"rtl\": true and converts components/ui in place), rather than re-adding or overwriting the components, which would lose the button.tsx edits"
+        },
+        {
+          "id": "keeps-radix",
+          "text": "Keeps the project on Radix / new-york and does not switch it to base-nova or Base UI as part of the restyle"
+        },
+        {
+          "id": "theme-pasted-last",
+          "text": "The theme.css contents go at the end of the global stylesheet, after the generated tokens"
+        },
+        {
+          "id": "dark-mode-pinned",
+          "text": "next-themes is pinned to light (or the toggle removed), so shadcn's neutral .dark palette cannot switch in under the navy theme"
+        },
+        {
+          "id": "destructive-tint",
+          "text": "The new-york solid red destructive button variant is replaced with the tinted one (bg-destructive/10 text-destructive), keeping the user's other button.tsx edits"
+        },
+        {
+          "id": "next-direction-wiring",
+          "text": "lang and dir are rendered on <html> by the server (from a cookie or similar), and the app is wrapped in the shadcn DirectionProvider"
+        },
+        {
+          "id": "physical-sides-from-direction",
+          "text": "Sonner's position is chosen from the direction, and the Sidebar side is handled for a migrated new-york sidebar: either kept constant because the migration made it logical, or the sidebar is made physical per shadcn's manual steps and then derived from the direction. Never branched on the language"
+        },
+        {
+          "id": "no-translucent-menu",
+          "text": "Does not set menuColor to a translucent option"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "name": "new-project-component-heavy",
+      "prompt": "Start a new Vite + React project for a small fleet maintenance team. I need a sidebar for navigation, a page with a bar chart of repairs per month split by vehicle type, a table of open work orders where each row has an actions menu, and a dialog to close a work order. Arabic first with an English toggle. Set it up properly so I can keep adding screens to it.",
+      "expected_output": "A base-nova project initialised with RTL on, the theme pasted last with the stray font removed, the theme provider removed, DirectionProvider wired, and the screen built from registry components that mirror correctly, including the chart and sidebar.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "init-rtl",
+          "text": "The project is initialised with the base-nova style and components.json has \"rtl\": true"
+        },
+        {
+          "id": "theme-and-font",
+          "text": "theme.css is pasted at the end of src/index.css, and the font import the CLI added (Geist or similar) is removed"
+        },
+        {
+          "id": "theme-provider-light",
+          "text": "The generated ThemeProvider is removed (or forced to light), so neither the system setting nor its D hotkey can switch the app to shadcn's dark palette"
+        },
+        {
+          "id": "direction-provider",
+          "text": "index.html ships lang=ar dir=rtl and the app is wrapped in DirectionProvider driven by the current language"
+        },
+        {
+          "id": "chart-mirrors",
+          "text": "The chart uses the var(--chart-N) tokens and mirrors in Arabic (XAxis reversed and YAxis on the right when the direction is rtl)"
+        },
+        {
+          "id": "sidebar-side",
+          "text": "The Sidebar's side is derived from the direction, so it sits on the right in Arabic and the left in English"
+        },
+        {
+          "id": "menu-groups",
+          "text": "Any DropdownMenuLabel sits inside a DropdownMenuGroup, so the Base UI menu does not throw"
+        },
+        {
+          "id": "ids-ltr",
+          "text": "Work order ids, dates or plate numbers render dir=ltr with tabular numerals"
+        },
+        {
+          "id": "registry-components",
+          "text": "The dialog, menu, table and sidebar come from the shadcn registry rather than being hand-built"
+        },
+        {
+          "id": "builds-clean",
+          "text": "The project type-checks and builds, and the page renders in both languages with no console errors"
+        }
+      ]
     }
   ]
 }
