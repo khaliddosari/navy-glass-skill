@@ -1,0 +1,308 @@
+/* ---------------------------------------------------------------------------
+   Navy glass theme.
+
+   Paste this whole file at the END of src/index.css, after whatever the shadcn
+   CLI generated. It overrides the generated palette rather than editing it, so
+   re-running the CLI to add a component never silently reverts the design.
+
+   Your src/index.css is expected to begin with the three usual imports:
+   tailwindcss, tw-animate-css and shadcn/tailwind.css. They are named rather
+   than written out, for the reason in the warning below.
+
+   Everything here is Tailwind v4 syntax (theme, custom-variant, utility
+   at-rules). This file stands on its own: the colour mapping below means it
+   works in a plain Vite or Next project with no shadcn CLI involved.
+
+   Standalone HTML page instead of a project? Load @tailwindcss/browser@4 and
+   put this file inside <style type="text/tailwindcss">. Nothing else: the
+   browser build supplies the framework itself, and adding an import line for
+   it only makes the page fetch a file that is not there.
+
+   WARNING, and it fails silently: never let the import at-rule text appear
+   anywhere inside that style block, not even in a comment. The browser build
+   scans for it, decides the sheet manages its own imports, and emits zero
+   utilities with nothing in the console. The page still shows the fonts and
+   the wash, so it looks like the theme loaded and only the layout broke.
+   Measured three ways: without the line, utilities work and the console is
+   clean; with it, they work with one failed fetch; with those two words in a
+   comment, every utility disappears.
+--------------------------------------------------------------------------- */
+
+/* --- Type ----------------------------------------------------------------
+   Thmanyah Sans carries Arabic and Latin in one family, which is why it can be
+   the whole UI font in both languages instead of pairing two faces that never
+   quite agree on weight. Only the weights a page uses are fetched.
+   Serif Display, Black only, sets the wordmark and nothing else.
+-------------------------------------------------------------------------- */
+@font-face {
+  font-family: "Thmanyah Sans";
+  src: url("https://cdn.jsdelivr.net/gh/khaliddosari/thmanyah-fonts@v1/thmanyah%20typeface/thmanyahsans/woff2/thmanyahsans-Light.woff2") format("woff2");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Thmanyah Sans";
+  src: url("https://cdn.jsdelivr.net/gh/khaliddosari/thmanyah-fonts@v1/thmanyah%20typeface/thmanyahsans/woff2/thmanyahsans-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Thmanyah Sans";
+  src: url("https://cdn.jsdelivr.net/gh/khaliddosari/thmanyah-fonts@v1/thmanyah%20typeface/thmanyahsans/woff2/thmanyahsans-Medium.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Thmanyah Sans";
+  src: url("https://cdn.jsdelivr.net/gh/khaliddosari/thmanyah-fonts@v1/thmanyah%20typeface/thmanyahsans/woff2/thmanyahsans-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Thmanyah Sans";
+  src: url("https://cdn.jsdelivr.net/gh/khaliddosari/thmanyah-fonts@v1/thmanyah%20typeface/thmanyahsans/woff2/thmanyahsans-Black.woff2") format("woff2");
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Thmanyah Serif Display";
+  src: url("https://cdn.jsdelivr.net/gh/khaliddosari/thmanyah-fonts@v1/thmanyah%20typeface/thmanyahserifdisplay/woff2/thmanyahserifdisplay-Black.woff2") format("woff2");
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* One step up from Tailwind's 12/14/16px, because these interfaces are read at
+   arm's length on a wall screen as often as on a laptop. Line heights are
+   ratios, so they scale with the sizes. */
+@theme {
+  --text-xs: 0.8125rem;
+  --text-sm: 0.9375rem;
+  --text-base: 1.0625rem;
+}
+
+/* --- Console breakpoints --------------------------------------------------
+   Width alone is the wrong test for a viewport-locked layout: a wide but short
+   window, which is what a laptop with a browser toolbar actually is, cannot
+   hold two rows of panels. So these test height as well. Unused variants cost
+   nothing, since Tailwind only emits the utilities a page actually uses.
+   How to build against them is in references/layout.md.
+-------------------------------------------------------------------------- */
+@custom-variant desk {
+  @media (min-width: 80rem) and (min-height: 40rem) {
+    @slot;
+  }
+}
+/* the console on a short laptop window, where secondary text gives up space first */
+@custom-variant desk-short {
+  @media (min-width: 80rem) and (min-height: 40rem) and (max-height: 52rem) {
+    @slot;
+  }
+}
+/* around 720px tall, the shortest supported window, where two-line clamps go to one */
+@custom-variant desk-tight {
+  @media (min-width: 80rem) and (min-height: 40rem) and (max-height: 47rem) {
+    @slot;
+  }
+}
+
+@theme inline {
+  /* Maps the :root tokens below onto Tailwind's colour utilities, so bg-card,
+     text-muted-foreground and border-border exist. The shadcn CLI emits an
+     identical block; duplicating it is harmless and is what lets this file work
+     in a project that never ran the CLI. */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --font-sans: "Thmanyah Sans", system-ui, sans-serif;
+  --font-heading: var(--font-sans);
+  --font-brand: "Thmanyah Serif Display", "Thmanyah Sans", serif;
+  /* Mono stays for ids, codes and clocks. Thmanyah sits before the generic
+     fallback so Arabic inside a mono label falls through to it glyph by glyph
+     rather than to a system face that does not match. */
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Thmanyah Sans", monospace;
+
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+/* --- Palette -------------------------------------------------------------
+   Light navy. Hue 250-264 throughout, so every surface, border and shadow is a
+   cool blue rather than a neutral grey with a blue accent dropped on top.
+   To move the whole design to another hue, change the hue angle in these
+   values and in the wash below; keep the lightness and chroma.
+-------------------------------------------------------------------------- */
+:root {
+  --background: oklch(0.975 0.01 250);
+  --foreground: oklch(0.16 0.045 258);
+
+  /* Surfaces are translucent on purpose: that is what makes them glass. */
+  --card: oklch(1 0 0 / 0.66);
+  --card-foreground: oklch(0.16 0.045 258);
+  --popover: oklch(0.99 0.005 250 / 0.9);
+  --popover-foreground: oklch(0.16 0.045 258);
+
+  --primary: oklch(0.3 0.105 262);
+  --primary-foreground: oklch(0.98 0.008 250);
+
+  --secondary: oklch(0.92 0.03 252 / 0.9);
+  --secondary-foreground: oklch(0.25 0.09 262);
+
+  --muted: oklch(0.94 0.018 250 / 0.7);
+  --muted-foreground: oklch(0.36 0.045 258);
+
+  --accent: oklch(0.91 0.04 252 / 0.85);
+  --accent-foreground: oklch(0.24 0.09 262);
+
+  --destructive: oklch(0.5 0.2 25);
+
+  --border: oklch(0.5 0.06 258 / 0.26);
+  --input: oklch(0.5 0.06 258 / 0.38);
+  --ring: oklch(0.45 0.1 260);
+
+  --radius: 0.9rem;
+
+  /* The glass recipe, reused by every panel and the header. A bright top edge
+     plus a soft navy drop shadow is what reads as a pane of glass lifted off
+     the background. */
+  --glass-edge: oklch(1 0 0 / 0.7);
+  --glass-shadow: 0 1px 2px oklch(0.28 0.09 262 / 0.06), 0 12px 36px -14px oklch(0.28 0.09 262 / 0.3);
+}
+
+/* --- The wash ------------------------------------------------------------
+   Translucent panels only read as glass if there is something behind them
+   worth blurring. This fixed layer sits behind everything and gives the blur
+   something to do. Four soft radial pools, off-centre and different sizes, so
+   no panel sits on a flat field.
+-------------------------------------------------------------------------- */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    radial-gradient(50rem 34rem at 6% -10%, oklch(0.62 0.14 258 / 0.5), transparent 60%),
+    radial-gradient(44rem 32rem at 100% 4%, oklch(0.7 0.11 232 / 0.42), transparent 62%),
+    radial-gradient(46rem 40rem at 88% 96%, oklch(0.42 0.13 264 / 0.3), transparent 62%),
+    radial-gradient(38rem 34rem at 22% 88%, oklch(0.66 0.12 272 / 0.26), transparent 64%);
+}
+
+/* Glass depends on translucency. Where the viewer asked for less of it, or the
+   browser cannot blur, fall back to an opaque surface rather than an
+   unreadable one. Do not drop these: without them the design fails open onto
+   text sitting directly on a gradient. */
+@supports not (backdrop-filter: blur(1px)) {
+  :root {
+    --card: oklch(1 0 0 / 0.95);
+  }
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  :root {
+    --card: oklch(1 0 0 / 0.97);
+    --popover: oklch(0.99 0.005 250 / 0.99);
+  }
+  body::before {
+    opacity: 0.35;
+  }
+}
+
+/* --- Base ---------------------------------------------------------------- */
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    /* Nothing may scroll the viewport sideways on a phone. */
+    overflow-x: hidden;
+  }
+  html {
+    @apply font-sans;
+    scroll-behavior: smooth;
+    /* iOS Safari: keep a sticky header clear of the notch */
+    -webkit-text-size-adjust: 100%;
+  }
+
+  /* Long Arabic paragraphs and long ids both need to wrap rather than widen. */
+  p, td, th {
+    overflow-wrap: anywhere;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+/* --- Letterforms ---------------------------------------------------------
+   Thmanyah's optional OpenType features are reserved for headings, sub-heads
+   and buttons, so body text and data keep the plain letterforms and stay easy
+   to scan:
+     ss01, ss08, salt, swsh  Arabic swash forms, single-storey a and g
+     ss03-ss07               alternate fatha shapes (they compete for the same
+                             mark, so the first one listed wins)
+     dlig                    discretionary ligatures
+     frac                    1/2, 1/4, 3/4 as fraction glyphs
+   Anything else that reads as a button opts in with the font-ornate utility.
+-------------------------------------------------------------------------- */
+h1, h2, h3, h4,
+button,
+[data-slot="button"],
+[data-slot="tabs-trigger"],
+[data-slot="empty-title"],
+/* in Arabic, status pills and header links get the full set too */
+html[lang="ar"] [data-slot="badge"],
+html[lang="ar"] header nav a {
+  font-feature-settings: "ss01", "ss03", "ss04", "ss05", "ss06", "ss07", "ss08", "salt", "swsh", "dlig", "frac";
+}
+
+@utility font-ornate {
+  font-feature-settings: "ss01", "ss03", "ss04", "ss05", "ss06", "ss07", "ss08", "salt", "swsh", "dlig", "frac";
+}
+
+/* Letter-spacing pulls joined Arabic letters apart, so tracking utilities are
+   neutralised in Arabic. Deliberately outside any @layer: layered rules lose
+   to Tailwind's utilities layer regardless of specificity, so this has to be
+   unlayered to win. */
+html[lang="ar"] [class*="tracking-"] {
+  letter-spacing: normal;
+}
+
+/* No double-tap-to-zoom delay on controls; pinch zoom stays available. */
+a, button, input, label, select, [role="tab"], [role="combobox"], [role="option"] {
+  touch-action: manipulation;
+}

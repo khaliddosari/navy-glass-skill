@@ -1,0 +1,154 @@
+{
+  "skill_name": "navy-glass-ui",
+  "evals": [
+    {
+      "id": 0,
+      "name": "arabic-incident-console",
+      "prompt": "Build me the front page for a small internal tool that shows live delivery-driver incidents at a logistics company. Arabic interface, with an English toggle. I want the open incidents as cards with a status on each (waiting, being handled, resolved, failed), a header with the company name and a clock, and it should fill the screen on my laptop without scrolling. Make it look good, not like a default bootstrap thing. Deliver it as a single standalone index.html I can open in a browser.",
+      "expected_output": "A page in the navy glass style: navy tokens, translucent panels over a gradient wash, Thmanyah fonts, RTL Arabic with logical properties, four-state status pills, viewport-locked layout.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "navy-tokens",
+          "text": "Colour tokens are navy oklch values in the 230-275 hue range, not neutral greys or stock shadcn defaults"
+        },
+        {
+          "id": "thmanyah-fonts",
+          "text": "Thmanyah Sans is loaded and set as the UI font for both scripts"
+        },
+        {
+          "id": "ambient-wash",
+          "text": "A fixed gradient wash sits behind the page (body::before with multiple radial-gradients)"
+        },
+        {
+          "id": "glass-panels",
+          "text": "Incident cards combine all four glass ingredients: translucent background, backdrop-blur, a light ring edge, and a soft navy-tinted shadow"
+        },
+        {
+          "id": "rtl-correct",
+          "text": "Document starts as lang=ar dir=rtl and the layout mirrors correctly when toggled to English"
+        },
+        {
+          "id": "logical-properties",
+          "text": "Layout uses logical properties (ms-/me-/ps-/pe-/text-start/start-/end-) with no physical ml-/mr-/pl-/pr-/text-left/text-right/left-/right- in the page's own markup"
+        },
+        {
+          "id": "four-status-states",
+          "text": "All four status states are present and each is conveyed by a word plus a colour, not colour alone"
+        },
+        {
+          "id": "viewport-locked",
+          "text": "The desktop layout locks to the viewport (dvh height with overflow hidden) so the page does not scroll at 1440x900"
+        },
+        {
+          "id": "clock-ltr-mono",
+          "text": "The clock renders LTR in a mono/tabular face so digits do not mirror or jump"
+        },
+        {
+          "id": "renders-clean",
+          "text": "The page renders without visual breakage: no overlapping text, no horizontal scrollbar, no unstyled flash of default browser styles"
+        }
+      ]
+    },
+    {
+      "id": 1,
+      "name": "english-settings-page",
+      "prompt": "I need an account settings page for my web app - profile fields (name, email, phone), a notifications section with some toggles, a plan/billing box showing the current plan, and a danger zone with a delete-account button. English only, no Arabic needed. Should match the rest of my stuff visually. Single standalone index.html please.",
+      "expected_output": "The same visual identity applied to an ordinary LTR form page: navy tokens, glass cards, Thmanyah, correct radius, destructive styling that is tinted rather than a solid red slab. Should not force Arabic or a console layout onto a page that does not need one.",
+      "files": [],
+      "assertions": [
+        {
+          "id": "navy-tokens",
+          "text": "Colour tokens are navy oklch values in the 230-275 hue range, not neutral greys or stock shadcn defaults"
+        },
+        {
+          "id": "thmanyah-fonts",
+          "text": "Thmanyah Sans is loaded and set as the UI font"
+        },
+        {
+          "id": "ambient-wash",
+          "text": "A fixed gradient wash sits behind the page (body::before with multiple radial-gradients)"
+        },
+        {
+          "id": "glass-panels",
+          "text": "Section cards combine all four glass ingredients: translucent background, backdrop-blur, a light ring edge, and a soft navy-tinted shadow"
+        },
+        {
+          "id": "radius-0.9rem",
+          "text": "The radius token is 0.9rem, giving the softer corners of the house style rather than shadcn's 0.625rem default"
+        },
+        {
+          "id": "destructive-tinted",
+          "text": "The delete-account button uses the tinted destructive treatment (destructive colour on a tinted background) rather than a solid red slab"
+        },
+        {
+          "id": "labels-not-placeholders",
+          "text": "Form fields have real labels rather than relying on placeholder text as the label"
+        },
+        {
+          "id": "no-forced-arabic",
+          "text": "The page is English/LTR as asked: no Arabic strings, no dir=rtl, no language toggle bolted on"
+        },
+        {
+          "id": "no-forced-console",
+          "text": "The page is not forced into a viewport-locked console layout; a settings page scrolls normally"
+        },
+        {
+          "id": "logical-properties",
+          "text": "Layout still uses logical properties, so an English-only page would mirror correctly if it ever needed to"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "restyle-plain-shadcn",
+      "prompt": "Here's a page from a project I started with plain shadcn defaults - it works but it looks generic and grey. Restyle it to match my other projects. It also needs to work in Arabic eventually, so fix anything that would break when the page mirrors. Give me back the updated component file plus a standalone index.html preview so I can see it.",
+      "expected_output": "Hardcoded bg-white/gray/hex converted to tokens, opaque panels converted to glass, physical properties (ml-, pl-, text-left, left-) converted to logical ones, theme layer added.",
+      "files": [
+        "inputs/eval-2/StatusBoard.tsx"
+      ],
+      "assertions": [
+        {
+          "id": "greys-converted",
+          "text": "Every hardcoded grey in StatusBoard.tsx (bg-gray-50, bg-white, border-gray-200, text-gray-500/700/900) is replaced by a theme token"
+        },
+        {
+          "id": "inline-hex-removed",
+          "text": "The inline style backgroundColor #1e293b on the Refresh button is gone, replaced by a themed variant"
+        },
+        {
+          "id": "physical-props-converted",
+          "text": "All physical properties are converted to logical ones: ml-8/ml-auto to ms-*, text-left to text-start, text-right to text-end, and the fixed panel's left-6 to start-6"
+        },
+        {
+          "id": "cards-are-glass",
+          "text": "The job cards carry the glass recipe (translucent bg-card, backdrop-blur, ring edge, navy shadow) instead of solid white with a grey border"
+        },
+        {
+          "id": "status-colours-kept",
+          "text": "The four job states keep distinct, saturated status colours rather than being flattened into navy monochrome"
+        },
+        {
+          "id": "theme-layer-added",
+          "text": "The navy token layer, Thmanyah fonts and the ambient wash are added to the project, not just per-element class tweaks"
+        },
+        {
+          "id": "destructive-tinted",
+          "text": "The Cancel job button uses the tinted destructive treatment rather than solid bg-red-600"
+        },
+        {
+          "id": "mirrors-correctly",
+          "text": "The Arabic preview mirrors cleanly: nav, the refresh control, the per-card status badge and the fixed detail panel all move to the correct side"
+        },
+        {
+          "id": "behaviour-preserved",
+          "text": "The component still compiles as valid TSX with the same props, state and job-selection behaviour as the input"
+        },
+        {
+          "id": "both-files-delivered",
+          "text": "Both the updated StatusBoard.tsx and a working standalone HTML preview were delivered"
+        }
+      ]
+    }
+  ]
+}
