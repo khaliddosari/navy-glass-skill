@@ -1,9 +1,12 @@
 # Navy Glass UI
 
-A Claude Code skill that builds and restyles web
-frontends in one consistent look: a light navy theme, translucent glass panels over
-a soft gradient wash, Thmanyah typography, and an Arabic-first interface that mirrors
-properly in both languages.
+An agent skill that builds and restyles web frontends in one consistent look: a
+light navy theme, translucent glass panels over a soft gradient wash, Thmanyah
+typography, and an Arabic-first interface that mirrors properly in both languages.
+
+It follows the open [Agent Skills](https://agentskills.io) format, so it works in
+Claude Code and in the other agents that read `SKILL.md`, such as Codex, Gemini CLI,
+GitHub Copilot and Cursor.
 
 It sits on top of [shadcn/ui](https://ui.shadcn.com) (the `base-nova` style, built on
 [Base UI](https://base-ui.com)), and it also restyles older shadcn projects on Radix.
@@ -25,7 +28,14 @@ It sits on top of [shadcn/ui](https://ui.shadcn.com) (the `base-nova` style, bui
 
 ## Install
 
-Clone it into your Claude Code skills folder, under the skill's name:
+Whichever agent you use, the folder must be named `navy-glass-ui`. The Agent Skills
+format requires the folder name to match the skill's `name`, and a plain
+`git clone` would name it `navy-glass-skill`. Update later with `git pull` inside
+that folder.
+
+### Claude Code
+
+Clone it into your Claude Code skills folder:
 
 ```bash
 # macOS / Linux
@@ -36,18 +46,32 @@ git clone https://github.com/khaliddosari/navy-glass-skill.git "$env:USERPROFILE
 ```
 
 To use it in one project only, clone it into that project's `.claude/skills/navy-glass-ui`
-instead. Update later with `git pull` inside that folder.
+instead.
+
+### Other agents
+
+Clone it into the folder your agent reads skills from, which its documentation
+names:
+
+```bash
+git clone https://github.com/khaliddosari/navy-glass-skill.git <your-agent-skills-folder>/navy-glass-ui
+```
+
+An agent without skills support can still use it: point it at `SKILL.md` and let it
+open the files that `SKILL.md` refers to as it needs them.
 
 ## Use
 
-Claude reaches for the skill on its own when you ask for frontend work, for example:
+Your agent reaches for the skill on its own when you ask for frontend work, for
+example:
 
 - "Start a new Vite project for a small operations team, Arabic first with an English toggle."
 - "Restyle this page to match my usual look, and make it ready for Arabic."
 - "Add a settings screen to this app."
 - "Build me a standalone HTML dashboard I can open from disk."
 
-You can also call it directly with `/navy-glass-ui`.
+In Claude Code you can also call it directly with `/navy-glass-ui`; other agents
+have their own way to invoke a skill by name.
 
 ## What's inside
 
