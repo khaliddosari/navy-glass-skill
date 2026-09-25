@@ -5,13 +5,25 @@
    CLI generated. It overrides the generated palette rather than editing it, so
    re-running the CLI to add a component never silently reverts the design.
 
-   Your src/index.css is expected to begin with the three usual imports:
-   tailwindcss, tw-animate-css and shadcn/tailwind.css. They are named rather
-   than written out, for the reason in the warning below.
+   Your stylesheet (src/index.css, or app/globals.css in Next) begins with the
+   usual imports: tailwindcss, and in a shadcn project tw-animate-css and, in
+   newer ones, shadcn/tailwind.css. This file depends only on the first. They
+   are named rather than written out, for the reason in the warning below.
 
    Everything here is Tailwind v4 syntax (theme, custom-variant, utility
    at-rules). This file stands on its own: the colour mapping below means it
    works in a plain Vite or Next project with no shadcn CLI involved.
+
+   A fresh `shadcn init` also pulls in a font package (Geist, Inter...) and
+   points --font-sans at it. The font-sans line below wins regardless, but
+   delete that font line and uninstall the package, or every visitor still
+   downloads a face nothing uses.
+
+   It also covers the popups the CLI generates: dialog, sheet and drawer
+   scrims, and the surfaces of menus, popovers and dialogs. Those rules are
+   keyed on data-slot, which is identical in the Base UI styles (base-nova)
+   and the Radix ones (radix-nova, new-york), so they restyle old projects
+   too. See "Popups and overlays" further down.
 
    Standalone HTML page instead of a project? Load @tailwindcss/browser@4 and
    put this file inside <style type="text/tailwindcss">. Nothing else: the
@@ -86,6 +98,12 @@
   --text-base: 1.0625rem;
 }
 
+/* dark: utilities fire only under a .dark class, never from the system
+   setting. The shadcn CLI writes the same line into a project; repeating it
+   here is harmless, and it is what keeps the dark: classes on copied shadcn
+   markup from switching on by themselves in a standalone page. */
+@custom-variant dark (&:is(.dark *));
+
 /* --- Console breakpoints --------------------------------------------------
    Width alone is the wrong test for a viewport-locked layout: a wide but short
    window, which is what a laptop with a browser toolbar actually is, cannot
@@ -135,6 +153,21 @@
   --color-input: var(--input);
   --color-ring: var(--ring);
 
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
   --font-sans: "Thmanyah Sans", system-ui, sans-serif;
   --font-heading: var(--font-sans);
   --font-brand: "Thmanyah Serif Display", "Thmanyah Sans", serif;
@@ -159,6 +192,10 @@
    values and in the wash below; keep the lightness and chroma.
 -------------------------------------------------------------------------- */
 :root {
+  /* A light design: native controls, scrollbars and autofill stay light even
+     on a machine set to dark mode. */
+  color-scheme: light;
+
   --background: oklch(0.975 0.01 250);
   --foreground: oklch(0.16 0.045 258);
 
@@ -193,6 +230,34 @@
      the background. */
   --glass-edge: oklch(1 0 0 / 0.7);
   --glass-shadow: 0 1px 2px oklch(0.28 0.09 262 / 0.06), 0 12px 36px -14px oklch(0.28 0.09 262 / 0.3);
+
+  /* Popups float higher than panels, so their shadow is deeper, and they sit
+     over content rather than the wash, so their edge is a navy hairline
+     rather than the white glass edge, which would vanish against a card. */
+  --popup-shadow: 0 0 0 1px oklch(0.5 0.06 258 / 0.18), 0 2px 6px oklch(0.28 0.09 262 / 0.08), 0 20px 48px -12px oklch(0.28 0.09 262 / 0.34);
+  --scrim: oklch(0.2 0.06 262 / 0.3);
+
+  /* Charts. The five hues are the wash's own (234-276), stepped in lightness
+     so neighbouring series separate even in greyscale, which is why they do
+     not read as a second accent. Status meaning in a chart (failures, over
+     SLA) uses the status colours, not these. */
+  --chart-1: oklch(0.42 0.14 262);
+  --chart-2: oklch(0.7 0.12 234);
+  --chart-3: oklch(0.55 0.15 276);
+  --chart-4: oklch(0.8 0.07 250);
+  --chart-5: oklch(0.3 0.08 258);
+
+  /* The sidebar is a container of other surfaces, so it is weaker glass than
+     a card (see "glass inside glass" in references/theme.md). Everything
+     else follows the main tokens, so a hue change carries over. */
+  --sidebar: oklch(1 0 0 / 0.5);
+  --sidebar-foreground: var(--foreground);
+  --sidebar-primary: var(--primary);
+  --sidebar-primary-foreground: var(--primary-foreground);
+  --sidebar-accent: var(--accent);
+  --sidebar-accent-foreground: var(--accent-foreground);
+  --sidebar-border: var(--border);
+  --sidebar-ring: var(--ring);
 }
 
 /* --- The wash ------------------------------------------------------------
@@ -214,6 +279,104 @@ body::before {
     radial-gradient(38rem 34rem at 22% 88%, oklch(0.66 0.12 272 / 0.26), transparent 64%);
 }
 
+/* --- Popups and overlays -------------------------------------------------
+   Stock shadcn dims the page with black at 10% and gives popups a black
+   shadow. Here the scrim is navy, and every popup surface gets a blur (the
+   popover token is translucent, so without one, text behind shows through
+   sharp) plus the deeper navy popup shadow.
+
+   Unlayered on purpose, like the Arabic tracking rule below: a rule inside a
+   layer loses to the generated utilities no matter how specific it is. To
+   change one instance anyway, use Tailwind's important modifier on it, for
+   example className="shadow-none!".
+
+   Toasts keep their own box-shadow, because theirs carries the keyboard
+   focus ring. Tooltips are left alone: they are solid dark navy by design.
+-------------------------------------------------------------------------- */
+:is(
+  [data-slot="dialog-overlay"],
+  [data-slot="alert-dialog-overlay"],
+  [data-slot="sheet-overlay"],
+  [data-slot="drawer-overlay"]
+) {
+  background-color: var(--scrim);
+}
+
+:is(
+  [data-slot="dialog-content"],
+  [data-slot="alert-dialog-content"],
+  [data-slot="sheet-content"],
+  [data-slot="drawer-content"],
+  [data-slot="popover-content"],
+  [data-slot="hover-card-content"],
+  [data-slot="navigation-menu-content"],
+  [data-slot="navigation-menu-viewport"],
+  [data-slot="dropdown-menu-content"],
+  [data-slot="dropdown-menu-sub-content"],
+  [data-slot="context-menu-content"],
+  [data-slot="context-menu-sub-content"],
+  [data-slot="menubar-content"],
+  [data-slot="menubar-sub-content"],
+  [data-slot="select-content"],
+  [data-slot="combobox-content"],
+  [data-slot="sidebar"][data-mobile="true"],
+  [data-slot="toast"],
+  [data-sonner-toast]
+) {
+  -webkit-backdrop-filter: blur(24px) saturate(1.5);
+  backdrop-filter: blur(24px) saturate(1.5);
+}
+
+:is(
+  [data-slot="dialog-content"],
+  [data-slot="alert-dialog-content"],
+  [data-slot="sheet-content"],
+  [data-slot="drawer-content"],
+  [data-slot="popover-content"],
+  [data-slot="hover-card-content"],
+  [data-slot="navigation-menu-content"],
+  [data-slot="navigation-menu-viewport"],
+  [data-slot="dropdown-menu-content"],
+  [data-slot="dropdown-menu-sub-content"],
+  [data-slot="context-menu-content"],
+  [data-slot="context-menu-sub-content"],
+  [data-slot="menubar-content"],
+  [data-slot="menubar-sub-content"],
+  [data-slot="select-content"],
+  [data-slot="combobox-content"],
+  [data-slot="sidebar"][data-mobile="true"]
+) {
+  box-shadow: var(--popup-shadow);
+}
+
+/* Stock Card is the panel, so it gets the full glass recipe here rather than
+   by editing card.tsx: blur, the white glass edge and the navy float shadow.
+   The sidebar rail is glass over the wash in the same way. */
+[data-slot="card"] {
+  -webkit-backdrop-filter: blur(24px) saturate(1.5);
+  backdrop-filter: blur(24px) saturate(1.5);
+  box-shadow: 0 0 0 1px var(--glass-edge), var(--glass-shadow);
+}
+
+[data-slot="sidebar-inner"] {
+  -webkit-backdrop-filter: blur(24px) saturate(1.5);
+  backdrop-filter: blur(24px) saturate(1.5);
+}
+
+/* On a phone the sidebar opens as a sheet over content, not over the wash, so
+   it takes the popup surface rather than the rail's weaker glass. */
+[data-slot="sidebar"][data-mobile="true"] {
+  --sidebar: var(--popover);
+}
+
+/* SidebarInset, the main column beside a sidebar, ships an opaque
+   bg-background in every variant, which would hide the wash behind the whole
+   page. It is a layout container, not a surface: the panels inside it carry
+   the glass. */
+[data-slot="sidebar-inset"] {
+  background-color: transparent;
+}
+
 /* Glass depends on translucency. Where the viewer asked for less of it, or the
    browser cannot blur, fall back to an opaque surface rather than an
    unreadable one. Do not drop these: without them the design fails open onto
@@ -221,6 +384,8 @@ body::before {
 @supports not (backdrop-filter: blur(1px)) {
   :root {
     --card: oklch(1 0 0 / 0.95);
+    --popover: oklch(0.99 0.005 250 / 0.98);
+    --sidebar: oklch(0.99 0.005 250 / 0.95);
   }
 }
 
@@ -228,6 +393,7 @@ body::before {
   :root {
     --card: oklch(1 0 0 / 0.97);
     --popover: oklch(0.99 0.005 250 / 0.99);
+    --sidebar: oklch(0.99 0.005 250 / 0.97);
   }
   body::before {
     opacity: 0.35;
