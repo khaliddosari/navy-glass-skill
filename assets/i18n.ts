@@ -52,6 +52,7 @@ const en = {
   /** One letter on a phone, where the full word costs a header row. */
   switchToShort: "ع",
   switchToLang: "ar" as Lang,
+  /** For `title`. The accessible name stays the visible word, see references/arabic-rtl.md. */
   switchToLabel: "Switch to Arabic",
 
   timeZone: "AST",
@@ -63,6 +64,16 @@ const en = {
 }
 
 type Dict = typeof en
+
+/**
+ * Arabic counts take six forms, not two: 0, 1, 2, 3-10, 11-99 and 100+ each read
+ * differently. Intl.PluralRules knows which is which; the dictionary supplies the
+ * words. Digits stay Latin (see references/arabic-rtl.md).
+ */
+const arabicPlural = new Intl.PluralRules("ar")
+function arabicCount(n: number, forms: Record<Intl.LDMLPluralRule, string>) {
+  return forms[arabicPlural.select(n)]
+}
 
 const ar: Dict = {
   brand: "العلامة",
@@ -77,7 +88,15 @@ const ar: Dict = {
   timeZoneShort: "السعودية",
 
   greeting: (name: string) => `أهلًا ${name}`,
-  itemCount: (n: number) => (n === 1 ? "عنصر واحد" : `${n} عناصر`),
+  itemCount: (n: number) =>
+    arabicCount(n, {
+      zero: "لا عناصر",
+      one: "عنصر واحد",
+      two: "عنصران",
+      few: `${n} عناصر`,
+      many: `${n} عنصرًا`,
+      other: `${n} عنصر`,
+    }),
 }
 
 export const STRINGS: Record<Lang, Dict> = { en, ar }
